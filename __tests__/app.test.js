@@ -41,7 +41,7 @@ describe("/api", () => {
           expect(endpoints[key]).toHaveProperty("description");
           expect(endpoints[key]).toHaveProperty("queries");
           expect(endpoints[key]).toHaveProperty("exampleResponse");
-          if (["POST", "PATCH", "DELETE"].includes(key)) {
+          if (/(POST)|(PATCH)|(DELETE)/.test(key)) {
             expect(endpoints[key]).toHaveProperty("bodyFormat");
           }
         }
@@ -82,14 +82,16 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body: { article } }) => {
-        expect(article).toHaveProperty("author");
-        expect(article).toHaveProperty("title");
-        expect(article).toHaveProperty("article_id");
-        expect(article).toHaveProperty("body");
-        expect(article).toHaveProperty("topic");
-        expect(article).toHaveProperty("created_at");
-        expect(article).toHaveProperty("votes");
-        expect(article).toHaveProperty("article_img_url");
+        expect(article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: expect.any(Number),
+          body: expect.any(String),
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+        });
       });
   });
   test("GET 404: responds with correct status and error message when requesting an article that does not exist", () => {
@@ -97,7 +99,7 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/999999")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Not found");
+        expect(msg).toBe("Article not found");
       });
   });
   test("GET 400: responds with correct status and error message when requesting an invalid ID", () => {
@@ -139,15 +141,56 @@ describe("/api/articles/:article_id/comments", () => {
       .get("/api/articles/999999/comments")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Not found");
+        expect(msg).toBe("Comment not found");
       });
   });
   test("GET 400: responds with appropriate status and error message for invalid article ID", () => {
     return request(app)
-    .get("/api/articles/forklift/comments")
-    .expect(400)
-    .then(({body: {msg}}) => {
-        expect(msg).toBe('Bad request');
-    })
+      .get("/api/articles/forklift/comments")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("POST 201: responds with posted comment", () => {
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send({
+        username: "rogersop",
+        body: "New comment",
+      })
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          body: expect.any(String),
+          votes: expect.any(Number),
+          author: expect.any(String),
+          article_id: expect.any(Number),
+          created_at: expect.any(String),
+        });
+      });
+  });
+  test("POST 400: responds with appropriate status and error message when request has missing fields", () => {
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send({
+        body: "New comment",
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("POST 400: responds with appropriate status and error message when request has invalid content", () => {
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send({
+        username: 'Simon',
+        body: 12,
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
   });
 });
