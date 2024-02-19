@@ -52,7 +52,11 @@ exports.selectCommentsById = (articleId) => {
 
 exports.insertComment = (articleId, comment) => {
   const { username, body } = comment;
-  return db
+  return db.query(`SELECT * FROM articles WHERE article_id = $1`, [articleId]).then(({rows}) => {
+    if (rows.length === 0) {
+        return Promise.reject({status: 404, msg: 'Article ID not found'})
+    }
+    return db
     .query(
       `INSERT INTO comments (
         body, votes, author, article_id)
@@ -63,6 +67,8 @@ exports.insertComment = (articleId, comment) => {
     .then(({ rows }) => {
       return rows[0];
     });
+  })
+  
 };
 
 exports.updateArticle = (articleId, update) => {

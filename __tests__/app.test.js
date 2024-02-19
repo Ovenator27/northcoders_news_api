@@ -263,5 +263,29 @@ describe("/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Bad request");
         });
     });
+    test("POST 404: responds with appropriate status and error message for article ID that does not exist", () => {
+      return request(app)
+        .post("/api/articles/999999/comments")
+        .send({
+          username: "rogersop",
+          body: "New comment",
+        })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Article ID not found");
+        });
+    });
+    test("POST 400: responds with appropriate status and error message for invalid article ID", () => {
+      return request(app)
+        .get("/api/articles/forklift/comments")
+        .send({
+            username: "rogersop",
+            body: "New comment",
+          })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
   });
 });
