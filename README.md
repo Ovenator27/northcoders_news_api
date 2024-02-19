@@ -1,3 +1,4 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+Accessing environment variables:
+Create a .env file for development and test and ensure they have the correct PGDATABASE which can be found in db/setup.sql.
