@@ -41,7 +41,7 @@ describe("/api", () => {
           expect(endpoints[key]).toHaveProperty("description");
           expect(endpoints[key]).toHaveProperty("queries");
           expect(endpoints[key]).toHaveProperty("exampleResponse");
-          if (["POST", "PATCH", "DELETE"].includes(key)) {
+          if (/(POST)|(PATCH)|(DELETE)/.test(key)) {
             expect(endpoints[key]).toHaveProperty("bodyFormat");
           }
         }
@@ -83,15 +83,15 @@ describe("/api/articles/:article_id", () => {
       .expect(200)
       .then(({ body: { article } }) => {
         expect(article).toMatchObject({
-            author: expect.any(String),
-            title: expect.any(String),
-            article_id: expect.any(Number),
-            body: expect.any(String),
-            topic: expect.any(String),
-            created_at: expect.any(String),
-            votes: expect.any(Number),
-            article_img_url: expect.any(String),
-        })
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: expect.any(Number),
+          body: expect.any(String),
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+        });
       });
   });
   test("GET 404: responds with correct status and error message when requesting an article that does not exist", () => {
@@ -152,18 +152,45 @@ describe("/api/articles/:article_id/comments", () => {
         expect(msg).toBe("Bad request");
       });
   });
-  xtest("POST 201: responds with posted comment", () => {
+  test("POST 201: responds with posted comment", () => {
     return request(app)
       .post("/api/articles/5/comments")
+      .send({
+        username: "rogersop",
+        body: "New comment",
+      })
       .expect(201)
       .then(({ body: { comment } }) => {
         expect(comment).toMatchObject({
-          body: expect.any("string"),
-          votes: expect.any("number"),
-          author: expect.any("string"),
-          article_id: expect.any("number"),
-          created_at: expext.any("number"),
+          body: expect.any(String),
+          votes: expect.any(Number),
+          author: expect.any(String),
+          article_id: expect.any(Number),
+          created_at: expect.any(String),
         });
+      });
+  });
+  test("POST 400: responds with appropriate status and error message when request has missing fields", () => {
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send({
+        body: "New comment",
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("POST 400: responds with appropriate status and error message when request has invalid content", () => {
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send({
+        username: 'Simon',
+        body: 12,
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
       });
   });
 });
