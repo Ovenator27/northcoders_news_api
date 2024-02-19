@@ -48,6 +48,34 @@ describe("/api", () => {
       });
   });
 });
+describe("/api/articles", () => {
+  test("GET 200: responds with an array of all articles", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(13);
+        articles.forEach((article) => {
+          expect(article).toHaveProperty("author");
+          expect(article).toHaveProperty("title");
+          expect(article).toHaveProperty("article_id");
+          expect(article).toHaveProperty("topic");
+          expect(article).toHaveProperty("created_at");
+          expect(article).toHaveProperty("votes");
+          expect(article).toHaveProperty("article_img_url");
+          expect(article).toHaveProperty("comment_count");
+        });
+      });
+  });
+  test("GET 200: responds with articles sorted by date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+});
 describe("/api/articles/:article_id", () => {
   test("GET 200: responds with an article object for the specified article", () => {
     return request(app)
@@ -81,31 +109,45 @@ describe("/api/articles/:article_id", () => {
       });
   });
 });
-describe("/api/articles", () => {
-  test("GET 200: responds with an array of all articles", () => {
+describe("/api/articles/:article_id/comments", () => {
+  test("GET 200: responds with an array of comments for specified article ID", () => {
     return request(app)
-      .get("/api/articles")
+      .get("/api/articles/5/comments")
       .expect(200)
-      .then(({ body: { articles } }) => {
-        expect(articles.length).toBe(13);
-        articles.forEach((article) => {
-          expect(article).toHaveProperty("author");
-          expect(article).toHaveProperty("title");
-          expect(article).toHaveProperty("article_id");
-          expect(article).toHaveProperty("topic");
-          expect(article).toHaveProperty("created_at");
-          expect(article).toHaveProperty("votes");
-          expect(article).toHaveProperty("article_img_url");
-          expect(article).toHaveProperty("comment_count");
+      .then(({ body: { comments } }) => {
+        expect(comments.length).toBe(2);
+        comments.forEach((comment) => {
+          expect(comment).toHaveProperty("comment_id");
+          expect(comment).toHaveProperty("votes");
+          expect(comment).toHaveProperty("created_at");
+          expect(comment).toHaveProperty("author");
+          expect(comment).toHaveProperty("body");
+          expect(comment).toHaveProperty("article_id");
         });
       });
   });
-  test("GET 200: responds with articles sorted by date in descending order", () => {
+  test("GET 200: responds with most recent comments first", () => {
     return request(app)
-      .get("/api/articles")
+      .get("/api/articles/5/comments")
       .expect(200)
-      .then(({ body: { articles } }) => {
-        expect(articles).toBeSortedBy('created_at', {descending:true});
+      .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy("created_at", { descending: true });
       });
+  });
+  test("GET 404: responds with appropriate status and error message for article ID that does not exist", () => {
+    return request(app)
+      .get("/api/articles/999999/comments")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Not found");
+      });
+  });
+  test("GET 400: responds with appropriate status and error message for invalid article ID", () => {
+    return request(app)
+    .get("/api/articles/forklift/comments")
+    .expect(400)
+    .then(({body: {msg}}) => {
+        expect(msg).toBe('Bad request');
+    })
   });
 });
