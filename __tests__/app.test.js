@@ -74,10 +74,38 @@ describe("/api/articles/:article_id", () => {
   });
   test("GET 400: responds with correct status and error message when requesting an invalid ID", () => {
     return request(app)
-    .get('/api/articles/forklift')
-    .expect(400)
-    .then(({body: {msg}}) => {
-        expect(msg).toBe('Bad request');
-    })
+      .get("/api/articles/forklift")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+});
+describe("/api/articles", () => {
+  test("GET 200: responds with an array of all articles", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(13);
+        articles.forEach((article) => {
+          expect(article).toHaveProperty("author");
+          expect(article).toHaveProperty("title");
+          expect(article).toHaveProperty("article_id");
+          expect(article).toHaveProperty("topic");
+          expect(article).toHaveProperty("created_at");
+          expect(article).toHaveProperty("votes");
+          expect(article).toHaveProperty("article_img_url");
+          expect(article).toHaveProperty("comment_count");
+        });
+      });
+  });
+  test("GET 200: responds with articles sorted by date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy('created_at', {descending:true});
+      });
   });
 });
