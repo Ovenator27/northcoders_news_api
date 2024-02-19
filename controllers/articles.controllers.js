@@ -1,6 +1,6 @@
 const {
   selectArticleById,
-  SelectArticles,
+  selectArticles,
   selectCommentById,
 } = require("../models/articles.models");
 
@@ -14,7 +14,7 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  SelectArticles()
+  selectArticles()
     .then((articles) => {
       res.status(200).send({ articles });
     })

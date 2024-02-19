@@ -82,14 +82,16 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body: { article } }) => {
-        expect(article).toHaveProperty("author");
-        expect(article).toHaveProperty("title");
-        expect(article).toHaveProperty("article_id");
-        expect(article).toHaveProperty("body");
-        expect(article).toHaveProperty("topic");
-        expect(article).toHaveProperty("created_at");
-        expect(article).toHaveProperty("votes");
-        expect(article).toHaveProperty("article_img_url");
+        expect(article).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            body: expect.any(String),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+        })
       });
   });
   test("GET 404: responds with correct status and error message when requesting an article that does not exist", () => {
@@ -97,7 +99,7 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/999999")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Not found");
+        expect(msg).toBe("Article not found");
       });
   });
   test("GET 400: responds with correct status and error message when requesting an invalid ID", () => {
@@ -139,15 +141,29 @@ describe("/api/articles/:article_id/comments", () => {
       .get("/api/articles/999999/comments")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Not found");
+        expect(msg).toBe("Comment not found");
       });
   });
   test("GET 400: responds with appropriate status and error message for invalid article ID", () => {
     return request(app)
-    .get("/api/articles/forklift/comments")
-    .expect(400)
-    .then(({body: {msg}}) => {
-        expect(msg).toBe('Bad request');
-    })
+      .get("/api/articles/forklift/comments")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  xtest("POST 201: responds with posted comment", () => {
+    return request(app)
+      .post("/api/articles/5/comments")
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          body: expect.any("string"),
+          votes: expect.any("number"),
+          author: expect.any("string"),
+          article_id: expect.any("number"),
+          created_at: expext.any("number"),
+        });
+      });
   });
 });
