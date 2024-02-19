@@ -64,3 +64,16 @@ exports.insertComment = (articleId, comment) => {
       return rows[0];
     });
 };
+
+exports.updateArticle = (articleId, update) => {
+    return db.query(`UPDATE articles
+    SET
+      votes = votes + $1
+    WHERE article_id = $2
+    RETURNING *;`, [update.inc_votes, articleId]).then(({rows}) => {
+        if(rows.length === 0) {
+            return Promise.reject({status: 404, msg: 'Article ID not found'})
+        }
+        return rows[0];
+    })
+}
