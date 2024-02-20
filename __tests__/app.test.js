@@ -21,16 +21,6 @@ describe("/api/topics", () => {
       });
   });
 });
-describe("Error handling", () => {
-  test("GET 404: responds with appropriate status and error message for incorrect route", () => {
-    return request(app)
-      .get("/topics")
-      .expect(404)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe("Path not found");
-      });
-  });
-});
 describe("/api", () => {
   test("GET 200: responds an object describing all the available endpoints on the API", () => {
     return request(app)
@@ -287,5 +277,15 @@ describe("/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Bad request");
         });
     });
+  });
+});
+describe("Error handling", () => {
+  test("GET 404: responds with appropriate status and error message for incorrect route", () => {
+    return request(app)
+      .get("/topics")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Path not found");
+      });
   });
 });
