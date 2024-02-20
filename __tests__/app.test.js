@@ -142,7 +142,7 @@ describe("/api/articles", () => {
         .get("/api/articles/ascending")
         .expect(400)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe('Bad request');
+          expect(msg).toBe("Bad request");
         });
     });
   });
@@ -407,6 +407,30 @@ describe("/api/users", () => {
             });
           });
         });
+    });
+  });
+});
+describe("/api/users/:username", () => {
+  describe('GET requests', () => {
+    test('GET 200: responds with user object specified by username', () => {
+      return request(app)
+      .get('/api/users/lurker')
+      .expect(200)
+      .then(({body: {user}}) => {
+        expect(user).toMatchObject({
+          username: expect.any(String),
+          avatar_url: expect.any(String),
+          name: expect.any(String)
+        })
+      })
+    });
+    test('GET 404: responds with appropriate status and error message when username does not exist', () => {
+      return request(app)
+      .get('/api/users/humpty-dumpty')
+      .expect(404)
+      .then(({body: {msg}}) => {
+        expect(msg).toBe('Username not found');
+      })
     });
   });
 });
