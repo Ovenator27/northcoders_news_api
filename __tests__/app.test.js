@@ -196,20 +196,20 @@ describe("/api/articles/:article_id/comments", () => {
           expect(comments).toBeSortedBy("created_at", { descending: true });
         });
     });
+    test("GET 200: responds with an empty array for article ID that exists but has no comments", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments.length).toBe(0);
+        });
+    });
     test("GET 404: responds with appropriate status and error message for article ID that does not exist", () => {
       return request(app)
         .get("/api/articles/999999/comments")
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Article ID not found");
-        });
-    });
-    test("GET 404: responds with appropriate status and error message for article ID that exists but has no comments", () => {
-      return request(app)
-        .get("/api/articles/2/comments")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("No comments found for article ID");
         });
     });
     test("GET 400: responds with appropriate status and error message for invalid article ID", () => {
