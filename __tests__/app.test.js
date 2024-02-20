@@ -100,7 +100,7 @@ describe("/api/articles/:article_id", () => {
         .get("/api/articles/999999")
         .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("Article not found");
+          expect(msg).toBe("Article ID not found");
         });
     });
     test("GET 400: responds with correct status and error message when requesting an invalid ID", () => {

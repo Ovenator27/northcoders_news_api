@@ -1,12 +1,6 @@
 const db = require('../db/connection')
 
-exports.selectCommentsById = (articleId) => {
-  return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [articleId])
-    .then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({ status: 404, msg: "Article ID not found" });
-      }
+exports.selectCommentsByArticleId = (articleId) => {
       return db
         .query(
           `SELECT * FROM comments 
@@ -17,7 +11,6 @@ exports.selectCommentsById = (articleId) => {
         .then(({ rows }) => {
           return rows;
         });
-    });
 };
 
 exports.insertComment = (articleId, comment) => {
