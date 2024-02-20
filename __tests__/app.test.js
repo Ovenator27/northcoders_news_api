@@ -114,6 +114,14 @@ describe("/api/articles/:article_id", () => {
           });
         });
     });
+    test('GET 200: responds with an article object containing the comment_count property', () => {
+      return request(app)
+      .get('/api/articles/1')
+      .expect(200)
+      .then(({body: {article}}) => {
+        expect(article).toHaveProperty('comment_count', 11)
+      })
+    });
     test("GET 404: responds with correct status and error message when requesting an article that does not exist", () => {
       return request(app)
         .get("/api/articles/999999")
