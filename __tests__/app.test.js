@@ -94,6 +94,58 @@ describe("/api/articles", () => {
         });
     });
   });
+  describe("sort_by query", () => {
+    test("GET 200: returns articles sorted by the requested column", () => {
+      return request(app)
+        .get("/api/articles?sort_by=author")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy("author", { descending: true });
+        });
+    });
+    test("GET 200: returns articles sorted by created_at date if no query is provided", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("GET 400: returns appropriate status and error message for invalid query", () => {
+      return request(app)
+        .get("/api/articles/forklift")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
+  describe("order query", () => {
+    test("GET 200: returns articles sorted ascending when requested", () => {
+      return request(app)
+        .get("/api/articles?order=asc")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy("created_at", { ascending: true });
+        });
+    });
+    test("GET 200: returns articles sorted descending by default if no query is specified", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("GET 400: returns appropriate status and error message for invalid order query", () => {
+      return request(app)
+        .get("/api/articles/ascending")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('Bad request');
+        });
+    });
+  });
 });
 describe("/api/articles/:article_id", () => {
   describe("GET requests", () => {
@@ -114,13 +166,13 @@ describe("/api/articles/:article_id", () => {
           });
         });
     });
-    test('GET 200: responds with an article object containing the comment_count property', () => {
+    test("GET 200: responds with an article object containing the comment_count property", () => {
       return request(app)
-      .get('/api/articles/1')
-      .expect(200)
-      .then(({body: {article}}) => {
-        expect(article).toHaveProperty('comment_count', 11)
-      })
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article).toHaveProperty("comment_count", 11);
+        });
     });
     test("GET 404: responds with correct status and error message when requesting an article that does not exist", () => {
       return request(app)
