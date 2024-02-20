@@ -65,6 +65,35 @@ describe("/api/articles", () => {
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
+  describe("topic query", () => {
+    test("GET 200: responds with a filtered array of articles based on topic query", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBe(1);
+        });
+    });
+    test("GET 200: responds with all articles if no topic query is provided", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBe(13);
+          articles.forEach((article) => {
+            expect(article).toMatchObject({
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(Number),
+            });
+          });
+        });
+    });
+  });
 });
 describe("/api/articles/:article_id", () => {
   describe("GET requests", () => {
@@ -306,18 +335,18 @@ describe("/api/users", () => {
   describe("GET requests", () => {
     test("GET 200: responds with an array of all users", () => {
       return request(app)
-      .get('/api/users')
-      .expect(200)
-      .then(({body: {users}}) => {
-        expect(users.length).toBe(4);
-        users.forEach((user) => {
-          expect(user).toMatchObject({
-            username: expect.any(String),
-            name: expect.any(String),
-            avatar_url: expect.any(String)
-          })
-        })
-      })
+        .get("/api/users")
+        .expect(200)
+        .then(({ body: { users } }) => {
+          expect(users.length).toBe(4);
+          users.forEach((user) => {
+            expect(user).toMatchObject({
+              username: expect.any(String),
+              name: expect.any(String),
+              avatar_url: expect.any(String),
+            });
+          });
+        });
     });
   });
 });
