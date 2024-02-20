@@ -390,6 +390,59 @@ describe("/api/comments/:comment_id", () => {
         });
     });
   });
+  describe("PATCH requests", () => {
+    test("PATCH 201: responds with updated comment", () => {
+      return request(app)
+        .patch("/api/comments/2")
+        .send({ inc_votes: -3 })
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment).toMatchObject({
+            body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+            votes: 11,
+            author: "butter_bridge",
+            article_id: 1,
+            created_at: expect.any(String)
+          });
+        });
+    });
+    test('PATCH 404: responds with correct status and error message when requesting a comment that does not exist', () => {
+      return request(app)
+        .patch("/api/comments/999999")
+        .send({ inc_votes: -5 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Comment ID not found");
+        });
+    });
+    test('PATCH 400: responds with correct status and error message when requesting an invalid comment ID', () => {
+      return request(app)
+        .patch("/api/comments/forklift")
+        .send({ inc_votes: -5 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test('PATCH 400: responds with appropriate status and error message when request has missing fields', () => {
+      return request(app)
+        .patch("/api/comments/5")
+        .send({})
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test('PATCH 400: responds with appropriate status and error message when request has invalid content', () => {
+      return request(app)
+        .patch("/api/comments/5")
+        .send({ inc_votes: "one" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
 });
 describe("/api/users", () => {
   describe("GET requests", () => {
@@ -411,26 +464,26 @@ describe("/api/users", () => {
   });
 });
 describe("/api/users/:username", () => {
-  describe('GET requests', () => {
-    test('GET 200: responds with user object specified by username', () => {
+  describe("GET requests", () => {
+    test("GET 200: responds with user object specified by username", () => {
       return request(app)
-      .get('/api/users/lurker')
-      .expect(200)
-      .then(({body: {user}}) => {
-        expect(user).toMatchObject({
-          username: expect.any(String),
-          avatar_url: expect.any(String),
-          name: expect.any(String)
-        })
-      })
+        .get("/api/users/lurker")
+        .expect(200)
+        .then(({ body: { user } }) => {
+          expect(user).toMatchObject({
+            username: expect.any(String),
+            avatar_url: expect.any(String),
+            name: expect.any(String),
+          });
+        });
     });
-    test('GET 404: responds with appropriate status and error message when username does not exist', () => {
+    test("GET 404: responds with appropriate status and error message when username does not exist", () => {
       return request(app)
-      .get('/api/users/humpty-dumpty')
-      .expect(404)
-      .then(({body: {msg}}) => {
-        expect(msg).toBe('Username not found');
-      })
+        .get("/api/users/humpty-dumpty")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Username not found");
+        });
     });
   });
 });
