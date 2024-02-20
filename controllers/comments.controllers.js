@@ -2,16 +2,16 @@ const { selectArticleById } = require("../models/articles.models");
 const {
   insertComment,
   selectCommentsByArticleId,
-} = require("../models/comments.controllers");
+} = require("../models/comments.models");
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   return Promise.all([
-    selectCommentsByArticleId(article_id),
     selectArticleById(article_id),
+    selectCommentsByArticleId(article_id)
   ])
     .then((returnedPromises) => {
-      res.status(200).send({ comments: returnedPromises[0] });
+      res.status(200).send({ comments: returnedPromises[1] });
     })
     .catch(next);
 };
@@ -19,9 +19,9 @@ exports.getCommentsByArticleId = (req, res, next) => {
 exports.postComment = (req, res, next) => {
   const { article_id } = req.params;
   const { body } = req;
-  insertComment(article_id, body)
-    .then((comment) => {
-      res.status(201).send({ comment });
+  return Promise.all([selectArticleById(article_id), insertComment(article_id, body)])
+    .then((returnedPromises) => {
+      res.status(201).send({ comment: returnedPromises[1] });
     })
     .catch(next);
 };
