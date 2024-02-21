@@ -447,6 +447,27 @@ describe("/api/articles/:article_id", () => {
         });
     });
   });
+  describe("DELETE requests", () => {
+    test("DELETE 204: deletes article and associated comments responds with status and no content", () => {
+      return request(app).delete("/api/articles/1").expect(204);
+    });
+    test("DELETE 404: responds with appropriate status and error code for an article ID that does not exist", () => {
+      return request(app)
+        .delete("/api/articles/9999")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Article ID not found");
+        });
+    });
+    test("DELETE 400: responds with appropriate status and error code for invalid article ID", () => {
+      return request(app)
+        .delete("/api/articles/forklift")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
 });
 describe("/api/articles/:article_id/comments", () => {
   describe("GET requests", () => {
