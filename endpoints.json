@@ -76,6 +76,27 @@
       "comment_count": 3
     }
   },
+  "PATCH /api/articles/:article_id": {
+    "description": "Increments the votes on an article by specified amount",
+    "queries": [],
+    "bodyFormat": { "inc_votes": "newVote" },
+    "exampleResponse": {
+      "article_id": 1,
+      "title": "Living in the shadow of a great man",
+      "topic": "mitch",
+      "author": "butter_bridge",
+      "body": "I find this existence challenging",
+      "created_at": "2020-07-09T20:11:00.000Z",
+      "votes": 80,
+      "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+    }
+  },
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes an article and associated comments",
+    "queries": [],
+    "bodyFormat": {},
+    "exampleResponse": {}
+  },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array of comments based on specified article ID",
     "queries": ["limit", "p"],
@@ -112,21 +133,6 @@
       "author": "rogersop",
       "votes": 0,
       "created_at": "2024-02-19T15:24:22.794Z"
-    }
-  },
-  "PATCH /api/articles/:article_id": {
-    "description": "Increments the votes on an article by specified amount",
-    "queries": [],
-    "bodyFormat": { "inc_votes": "newVote" },
-    "exampleResponse": {
-      "article_id": 1,
-      "title": "Living in the shadow of a great man",
-      "topic": "mitch",
-      "author": "butter_bridge",
-      "body": "I find this existence challenging",
-      "created_at": "2020-07-09T20:11:00.000Z",
-      "votes": 80,
-      "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
     }
   },
   "DELETE /api/comments/:comment_id": {

@@ -57,21 +57,22 @@ exports.selectArticles = (
   queryStr += ` GROUP BY articles.article_id
   ORDER BY articles.${sort_by} ${order}`;
 
-  return db.query(queryStr, queryValues).then(({ rows }) => {
-    queryValues.push(limit);
-    queryStr += ` LIMIT $${queryValues.length}`;
+  return db
+    .query(queryStr, queryValues)
+    .then(({ rows }) => {
+      queryValues.push(limit);
+      queryStr += ` LIMIT $${queryValues.length}`;
 
-    queryValues.push(offset);
-    queryStr += ` OFFSET $${queryValues.length}`;
+      queryValues.push(offset);
+      queryStr += ` OFFSET $${queryValues.length}`;
 
-    const paginatedRows = db.query(queryStr, queryValues);
+      const paginatedRows = db.query(queryStr, queryValues);
 
-    return Promise.all([rows.length, paginatedRows])
-  }).then(
-    (promises) => {
+      return Promise.all([rows.length, paginatedRows]);
+    })
+    .then((promises) => {
       return promises;
-    }
-  );
+    });
 };
 
 exports.updateArticle = (articleId, update) => {
@@ -104,5 +105,28 @@ exports.insertArticle = (article) => {
     )
     .then(({ rows }) => {
       return rows[0];
+    });
+};
+
+exports.removeArticle = (articleId) => {
+  return db
+    .query(
+      `DELETE FROM comments 
+  WHERE article_id = $1
+  RETURNING *;`,
+      [articleId]
+    )
+    .then(({rows}) => {
+      return db.query(
+        `DELETE FROM articles 
+    WHERE article_id = $1 
+    RETURNING *;`,
+        [articleId]
+      );
+    })
+    .then(({ rowCount }) => {
+      if(rowCount === 0) {
+        return Promise.reject({status:404, msg:'Article ID not found'})
+      }
     });
 };
