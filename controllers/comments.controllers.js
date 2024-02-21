@@ -8,9 +8,10 @@ const {
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
+  const {limit, p} = req.query
   return Promise.all([
     selectArticleById(article_id),
-    selectCommentsByArticleId(article_id),
+    selectCommentsByArticleId(article_id, limit, p),
   ])
     .then((returnedPromises) => {
       res.status(200).send({ comments: returnedPromises[1] });
