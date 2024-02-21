@@ -8,17 +8,49 @@ beforeEach(() => seed(data));
 afterAll(() => db.end());
 
 describe("/api/topics", () => {
-  test("GET 200: responds with an array of topic objects", () => {
-    return request(app)
-      .get("/api/topics")
-      .expect(200)
-      .then(({ body: { topics } }) => {
-        expect(topics.length).toBe(3);
-        topics.forEach((topic) => {
-          expect(typeof topic.slug).toBe("string");
-          expect(typeof topic.description).toBe("string");
+  describe("Get requests", () => {
+    test("GET 200: responds with an array of topic objects", () => {
+      return request(app)
+        .get("/api/topics")
+        .expect(200)
+        .then(({ body: { topics } }) => {
+          expect(topics.length).toBe(3);
+          topics.forEach((topic) => {
+            expect(typeof topic.slug).toBe("string");
+            expect(typeof topic.description).toBe("string");
+          });
         });
-      });
+    });
+  });
+  describe("POST requests", () => {
+    test("POST 201: responds with newly added topic", () => {
+      const newTopic = {
+        slug: "topic name here",
+        description: "description here",
+      };
+      return request(app)
+        .post("/api/topics")
+        .send(newTopic)
+        .expect(201)
+        .then(({ body: { topic } }) => {
+          expect(topic).toMatchObject({
+            slug: "topic name here",
+            description: "description here",
+          });
+        });
+    });
+    test("POST 400: responds with appropriate status and error message when request has missing fields", () => {
+      const newTopic = {
+        description: "description here",
+      };
+      return request(app)
+        .post("/api/topics")
+        .expect(400)
+        .send(newTopic)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
   });
 });
 describe("/api", () => {
@@ -543,13 +575,13 @@ describe("/api/articles/:article_id/comments", () => {
             ]);
           });
       });
-      test('GET 400: returns appropriate status and error message for invalid page query', () => {
+      test("GET 400: returns appropriate status and error message for invalid page query", () => {
         return request(app)
-        .get('/api/articles/1/comments?p=one')
-        .expect(400)
-        .then(({body: {msg}}) => {
-          expect(msg).toBe('Bad request');
-        })
+          .get("/api/articles/1/comments?p=one")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request");
+          });
       });
     });
   });
