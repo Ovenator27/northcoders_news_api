@@ -42,7 +42,7 @@ describe("/api/articles", () => {
   describe("GET requests", () => {
     test("GET 200: responds with an array of all articles", () => {
       return request(app)
-        .get("/api/articles")
+        .get("/api/articles?limit=50")
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(articles.length).toBe(13);
@@ -77,7 +77,7 @@ describe("/api/articles", () => {
       });
       test("GET 200: responds with all articles if no topic query is provided", () => {
         return request(app)
-          .get("/api/articles")
+          .get("/api/articles?limit=50")
           .expect(200)
           .then(({ body: { articles } }) => {
             expect(articles.length).toBe(13);
@@ -145,6 +145,101 @@ describe("/api/articles", () => {
           .then(({ body: { msg } }) => {
             expect(msg).toBe("Bad request");
           });
+      });
+    });
+    describe('limit query', () => {
+      test('GET 200: responds with number of articles according to limit request', () => {
+        return request(app)
+        .get('/api/articles?limit=5')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles.length).toBe(5);
+        })
+      });
+      test('GET 200: responds with 10 articles if no limit is provided ', () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles.length).toBe(10);
+        })
+      });
+      test('GET 400: responds with appropriate status and error message when provided with invalid limit query', () => {
+        return request(app)
+        .get('/api/articles?limit=one')
+        .expect(400)
+        .then(({body: {msg}}) => {
+          expect(msg).toBe('Bad request');
+        })
+      });
+    });
+    describe('p query', () => {
+      test('GET 200: returns articles on specified page according to limit and p query', () => {
+        return request(app)
+        .get('/api/articles?limit=2&&p=2')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles.length).toBe(2);
+          expect(articles).toEqual([
+            {
+              article_id: 2,
+              author: 'icellusedkars',
+              title: 'Sony Vaio; or, The Laptop',
+              topic: 'mitch',
+              created_at: '2020-10-16T05:03:00.000Z',
+              votes: 0,
+              article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+              comment_count: 0
+            },
+            {
+              article_id: 12,
+              author: 'butter_bridge',
+              title: 'Moustache',
+              topic: 'mitch',
+              created_at: '2020-10-11T11:24:00.010Z',
+              votes: 0,
+              article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+              comment_count: 0
+            }
+          ]);
+        })
+      });
+      test('GET 200: returns the first page if no page is specified', () => {
+        return request(app)
+        .get('/api/articles?limit=2')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles).toEqual([
+            {
+              article_id: 3,
+              author: 'icellusedkars',
+              title: 'Eight pug gifs that remind me of mitch',
+              topic: 'mitch',
+              created_at: '2020-11-03T09:12:00.000Z',
+              votes: 0,
+              article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+              comment_count: 2
+            },
+            {
+              article_id: 6,
+              author: 'icellusedkars',
+              title: 'A',
+              topic: 'mitch',
+              created_at: '2020-10-18T01:00:00.000Z',
+              votes: 0,
+              article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+              comment_count: 1
+            }
+          ])
+        })
+      });
+      test('GET 400: returns appropriate status and error message if provided an invalid page query', () => {
+        return request(app)
+        .get('/api/articles?p=one')
+        .expect(400)
+        .then(({body: {msg}}) => {
+          expect(msg).toBe('Bad request');
+        })
       });
     });
   });

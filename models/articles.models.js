@@ -19,7 +19,13 @@ exports.selectArticleById = (articleId) => {
     });
 };
 
-exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
+exports.selectArticles = (
+  topic,
+  sort_by = "created_at",
+  order = "desc",
+  limit = 10,
+  page = 1,
+) => {
   if (
     ![
       "article_id",
@@ -37,6 +43,7 @@ exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
   }
 
   const queryValues = [];
+  const offset = (page-1) * limit
   let queryStr = `SELECT 
   articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count 
   FROM articles 
@@ -46,9 +53,15 @@ exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
     queryValues.push(topic);
     queryStr += ` WHERE topic = $1`;
   }
-
+  
+  queryValues.push(limit);
   queryStr += ` GROUP BY articles.article_id
-  ORDER BY articles.${sort_by} ${order};`;
+  ORDER BY articles.${sort_by} ${order}
+  LIMIT $${queryValues.length}`;
+
+  queryValues.push(offset)
+  queryStr += ` OFFSET $${queryValues.length}`
+
   return db.query(queryStr, queryValues).then(({ rows }) => {
     return rows;
   });
@@ -73,13 +86,16 @@ exports.updateArticle = (articleId, update) => {
 };
 
 exports.insertArticle = (article) => {
-  const {author, title, body, topic} = article
-  return db.query(`INSERT INTO articles 
+  const { author, title, body, topic } = article;
+  return db
+    .query(
+      `INSERT INTO articles 
   (author, title, body, topic, votes)
   VALUES
   ($1, $2, $3, $4, 0) RETURNING *;`,
-  [author, title, body, topic])
-  .then(({rows}) => {
-    return rows[0]
-  })
-}
+      [author, title, body, topic]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};
