@@ -80,6 +80,6 @@ exports.insertArticle = (article) => {
   ($1, $2, $3, $4, 0) RETURNING *;`,
   [author, title, body, topic])
   .then(({rows}) => {
-    return rows[0];
+    return rows[0]
   })
 }

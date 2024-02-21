@@ -173,6 +173,35 @@ describe("/api/articles", () => {
           });
         });
     });
+    test('POST 400: responds with appropriate status and error message when request has missing fields', () => {
+      const newArticle = {
+        author: "icellusedkars",
+        body: "Body",
+        topic: "cats",
+      };
+      return request(app).
+      post('/api/articles')
+      .expect(400)
+      .send(newArticle)
+      .then(({body: {msg}}) => {
+        expect(msg).toBe('Bad request');
+      })
+    });
+    test('POST 400: responds with appropriate status and error message when request has invalid content', () => {
+      const newArticle = {
+        author: "Anon",
+        title: "Title",
+        body: "Body",
+        topic: "cats",
+      };
+      return request(app)
+      .post('/api/articles')
+      .send(newArticle)
+      .expect(400)
+      .then(({body: {msg}}) => {
+        expect(msg).toBe('Bad request');
+      })
+    });
   });
 });
 describe("/api/articles/:article_id", () => {
