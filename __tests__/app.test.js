@@ -39,71 +39,26 @@ describe("/api", () => {
   });
 });
 describe("/api/articles", () => {
-  test("GET 200: responds with an array of all articles", () => {
-    return request(app)
-      .get("/api/articles")
-      .expect(200)
-      .then(({ body: { articles } }) => {
-        expect(articles.length).toBe(13);
-        articles.forEach((article) => {
-          expect(article).toHaveProperty("author");
-          expect(article).toHaveProperty("title");
-          expect(article).toHaveProperty("article_id");
-          expect(article).toHaveProperty("topic");
-          expect(article).toHaveProperty("created_at");
-          expect(article).toHaveProperty("votes");
-          expect(article).toHaveProperty("article_img_url");
-          expect(article).toHaveProperty("comment_count");
-        });
-      });
-  });
-  test("GET 200: responds with articles sorted by date in descending order", () => {
-    return request(app)
-      .get("/api/articles")
-      .expect(200)
-      .then(({ body: { articles } }) => {
-        expect(articles).toBeSortedBy("created_at", { descending: true });
-      });
-  });
-  describe("topic query", () => {
-    test("GET 200: responds with a filtered array of articles based on topic query", () => {
-      return request(app)
-        .get("/api/articles?topic=cats")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(articles.length).toBe(1);
-        });
-    });
-    test("GET 200: responds with all articles if no topic query is provided", () => {
+  describe("GET requests", () => {
+    test("GET 200: responds with an array of all articles", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(articles.length).toBe(13);
           articles.forEach((article) => {
-            expect(article).toMatchObject({
-              title: expect.any(String),
-              topic: expect.any(String),
-              author: expect.any(String),
-              created_at: expect.any(String),
-              votes: expect.any(Number),
-              article_img_url: expect.any(String),
-              comment_count: expect.any(Number),
-            });
+            expect(article).toHaveProperty("author");
+            expect(article).toHaveProperty("title");
+            expect(article).toHaveProperty("article_id");
+            expect(article).toHaveProperty("topic");
+            expect(article).toHaveProperty("created_at");
+            expect(article).toHaveProperty("votes");
+            expect(article).toHaveProperty("article_img_url");
+            expect(article).toHaveProperty("comment_count");
           });
         });
     });
-  });
-  describe("sort_by query", () => {
-    test("GET 200: returns articles sorted by the requested column", () => {
-      return request(app)
-        .get("/api/articles?sort_by=author")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(articles).toBeSortedBy("author", { descending: true });
-        });
-    });
-    test("GET 200: returns articles sorted by created_at date if no query is provided", () => {
+    test("GET 200: responds with articles sorted by date in descending order", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
@@ -111,39 +66,141 @@ describe("/api/articles", () => {
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
-    test("GET 400: returns appropriate status and error message for invalid query", () => {
-      return request(app)
-        .get("/api/articles/forklift")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
-        });
+    describe("topic query", () => {
+      test("GET 200: responds with a filtered array of articles based on topic query", () => {
+        return request(app)
+          .get("/api/articles?topic=cats")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).toBe(1);
+          });
+      });
+      test("GET 200: responds with all articles if no topic query is provided", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).toBe(13);
+            articles.forEach((article) => {
+              expect(article).toMatchObject({
+                title: expect.any(String),
+                topic: expect.any(String),
+                author: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String),
+                comment_count: expect.any(Number),
+              });
+            });
+          });
+      });
+    });
+    describe("sort_by query", () => {
+      test("GET 200: returns articles sorted by the requested column", () => {
+        return request(app)
+          .get("/api/articles?sort_by=author")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("author", { descending: true });
+          });
+      });
+      test("GET 200: returns articles sorted by created_at date if no query is provided", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+      test("GET 400: returns appropriate status and error message for invalid query", () => {
+        return request(app)
+          .get("/api/articles/forklift")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request");
+          });
+      });
+    });
+    describe("order query", () => {
+      test("GET 200: returns articles sorted ascending when requested", () => {
+        return request(app)
+          .get("/api/articles?order=asc")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("created_at", { ascending: true });
+          });
+      });
+      test("GET 200: returns articles sorted descending by default if no query is specified", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+      test("GET 400: returns appropriate status and error message for invalid order query", () => {
+        return request(app)
+          .get("/api/articles/ascending")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request");
+          });
+      });
     });
   });
-  describe("order query", () => {
-    test("GET 200: returns articles sorted ascending when requested", () => {
+  describe("POST requests", () => {
+    test("POST 201: responds with newly created article", () => {
+      const newArticle = {
+        author: "icellusedkars",
+        title: "Title",
+        body: "Body",
+        topic: "cats",
+      };
       return request(app)
-        .get("/api/articles?order=asc")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(articles).toBeSortedBy("created_at", { ascending: true });
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(201)
+        .then(({ body: { article } }) => {
+          expect(article).toMatchObject({
+            author: "icellusedkars",
+            title: "Title",
+            body: "Body",
+            topic: "cats",
+            article_id: expect.any(Number),
+            votes: 0,
+            created_at: expect.any(String),
+            comment_count: 0
+          });
         });
     });
-    test("GET 200: returns articles sorted descending by default if no query is specified", () => {
-      return request(app)
-        .get("/api/articles")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(articles).toBeSortedBy("created_at", { descending: true });
-        });
+    test('POST 400: responds with appropriate status and error message when request has missing fields', () => {
+      const newArticle = {
+        author: "icellusedkars",
+        body: "Body",
+        topic: "cats",
+      };
+      return request(app).
+      post('/api/articles')
+      .expect(400)
+      .send(newArticle)
+      .then(({body: {msg}}) => {
+        expect(msg).toBe('Bad request');
+      })
     });
-    test("GET 400: returns appropriate status and error message for invalid order query", () => {
+    test('POST 400: responds with appropriate status and error message when request has invalid content', () => {
+      const newArticle = {
+        author: "Anon",
+        title: "Title",
+        body: "Body",
+        topic: "cats",
+      };
       return request(app)
-        .get("/api/articles/ascending")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
-        });
+      .post('/api/articles')
+      .send(newArticle)
+      .expect(400)
+      .then(({body: {msg}}) => {
+        expect(msg).toBe('Bad request');
+      })
     });
   });
 });
@@ -391,22 +448,22 @@ describe("/api/comments/:comment_id", () => {
     });
   });
   describe("PATCH requests", () => {
-    test("PATCH 201: responds with updated comment", () => {
+    test("PATCH 200: responds with updated comment", () => {
       return request(app)
         .patch("/api/comments/2")
         .send({ inc_votes: -3 })
-        .expect(201)
+        .expect(200)
         .then(({ body: { comment } }) => {
           expect(comment).toMatchObject({
             body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
             votes: 11,
             author: "butter_bridge",
             article_id: 1,
-            created_at: expect.any(String)
+            created_at: expect.any(String),
           });
         });
     });
-    test('PATCH 404: responds with correct status and error message when requesting a comment that does not exist', () => {
+    test("PATCH 404: responds with correct status and error message when requesting a comment that does not exist", () => {
       return request(app)
         .patch("/api/comments/999999")
         .send({ inc_votes: -5 })
@@ -415,7 +472,7 @@ describe("/api/comments/:comment_id", () => {
           expect(msg).toBe("Comment ID not found");
         });
     });
-    test('PATCH 400: responds with correct status and error message when requesting an invalid comment ID', () => {
+    test("PATCH 400: responds with correct status and error message when requesting an invalid comment ID", () => {
       return request(app)
         .patch("/api/comments/forklift")
         .send({ inc_votes: -5 })
@@ -424,7 +481,7 @@ describe("/api/comments/:comment_id", () => {
           expect(msg).toBe("Bad request");
         });
     });
-    test('PATCH 400: responds with appropriate status and error message when request has missing fields', () => {
+    test("PATCH 400: responds with appropriate status and error message when request has missing fields", () => {
       return request(app)
         .patch("/api/comments/5")
         .send({})
@@ -433,7 +490,7 @@ describe("/api/comments/:comment_id", () => {
           expect(msg).toBe("Bad request");
         });
     });
-    test('PATCH 400: responds with appropriate status and error message when request has invalid content', () => {
+    test("PATCH 400: responds with appropriate status and error message when request has invalid content", () => {
       return request(app)
         .patch("/api/comments/5")
         .send({ inc_votes: "one" })
