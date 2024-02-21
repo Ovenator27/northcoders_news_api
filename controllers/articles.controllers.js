@@ -17,8 +17,8 @@ exports.getArticleById = (req, res, next) => {
 exports.getArticles = (req, res, next) => {
   const { topic, sort_by, order, limit, p } = req.query;
   selectArticles(topic, sort_by, order, limit, p)
-    .then((articles) => {
-      res.status(200).send({ articles });
+    .then(([rowCount, {rows}]) => {
+      res.status(200).send({ articles: rows, total_count: rowCount });
     })
     .catch(next);
 };

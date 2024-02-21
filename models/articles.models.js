@@ -24,7 +24,7 @@ exports.selectArticles = (
   sort_by = "created_at",
   order = "desc",
   limit = 10,
-  page = 1,
+  page = 1
 ) => {
   if (
     ![
@@ -43,7 +43,7 @@ exports.selectArticles = (
   }
 
   const queryValues = [];
-  const offset = (page-1) * limit
+  const offset = (page - 1) * limit;
   let queryStr = `SELECT 
   articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count 
   FROM articles 
@@ -53,18 +53,25 @@ exports.selectArticles = (
     queryValues.push(topic);
     queryStr += ` WHERE topic = $1`;
   }
-  
-  queryValues.push(limit);
-  queryStr += ` GROUP BY articles.article_id
-  ORDER BY articles.${sort_by} ${order}
-  LIMIT $${queryValues.length}`;
 
-  queryValues.push(offset)
-  queryStr += ` OFFSET $${queryValues.length}`
+  queryStr += ` GROUP BY articles.article_id
+  ORDER BY articles.${sort_by} ${order}`;
 
   return db.query(queryStr, queryValues).then(({ rows }) => {
-    return rows;
-  });
+    queryValues.push(limit);
+    queryStr += ` LIMIT $${queryValues.length}`;
+
+    queryValues.push(offset);
+    queryStr += ` OFFSET $${queryValues.length}`;
+
+    const paginatedRows = db.query(queryStr, queryValues);
+
+    return Promise.all([rows.length, paginatedRows])
+  }).then(
+    (promises) => {
+      return promises;
+    }
+  );
 };
 
 exports.updateArticle = (articleId, update) => {

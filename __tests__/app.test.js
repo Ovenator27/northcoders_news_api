@@ -164,6 +164,17 @@ describe("/api/articles", () => {
           expect(articles.length).toBe(10);
         })
       });
+      test('GET 200: responds with the total count property showing total articles discounting limit', () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+          expect(body).toMatchObject(({
+            articles: expect.any(Object),
+            total_count: expect.any(Number)
+          }))
+        })
+      });
       test('GET 400: responds with appropriate status and error message when provided with invalid limit query', () => {
         return request(app)
         .get('/api/articles?limit=one')
