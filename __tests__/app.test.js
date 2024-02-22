@@ -7,6 +7,23 @@ const app = require("../app");
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
+describe("/api", () => {
+  test("GET 200: responds an object describing all the available endpoints on the API", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body: { endpoints } }) => {
+        for (let key in endpoints) {
+          expect(endpoints[key]).toHaveProperty("description");
+          expect(endpoints[key]).toHaveProperty("queries");
+          expect(endpoints[key]).toHaveProperty("exampleResponse");
+          if (/(POST)|(PATCH)|(DELETE)/.test(key)) {
+            expect(endpoints[key]).toHaveProperty("bodyFormat");
+          }
+        }
+      });
+  });
+});
 describe("/api/topics", () => {
   describe("Get requests", () => {
     test("GET 200: responds with an array of topic objects", () => {
@@ -53,21 +70,43 @@ describe("/api/topics", () => {
     });
   });
 });
-describe("/api", () => {
-  test("GET 200: responds an object describing all the available endpoints on the API", () => {
-    return request(app)
-      .get("/api")
+describe('/api/topics/:topic', () => {
+  describe('GET requests', () => {
+    test('GET 200: responds with an array of all articles related to chosen topic', () => {
+      return request(app)
+      .get('/api/topics/mitch')
       .expect(200)
-      .then(({ body: { endpoints } }) => {
-        for (let key in endpoints) {
-          expect(endpoints[key]).toHaveProperty("description");
-          expect(endpoints[key]).toHaveProperty("queries");
-          expect(endpoints[key]).toHaveProperty("exampleResponse");
-          if (/(POST)|(PATCH)|(DELETE)/.test(key)) {
-            expect(endpoints[key]).toHaveProperty("bodyFormat");
-          }
-        }
-      });
+      .then(({body: {articles}}) => {
+        expect(articles.length).toBe(12);
+        articles.forEach((article) => {
+          expect(article).toMatchObject(({
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String)
+          }))
+        })
+      })
+    });
+    test('GET 200: responds with an empty array for a topic with no associated articles', () => {
+      return request(app)
+      .get('/api/topics/paper')
+      .expect(200)
+      .then(({body: {articles}}) => {
+        expect(articles.length).toBe(0);
+      })
+    });
+    test('GET 404: responds with appropriate status and error message for a topic that does not exist', () => {
+      return request(app)
+      .get('/api/topics/forklift')
+      .expect(404)
+      .then(({body: {msg}}) => {
+        expect(msg).toBe('Topic not found');
+      })
+    });
   });
 });
 describe("/api/articles", () => {

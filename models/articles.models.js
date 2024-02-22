@@ -116,7 +116,7 @@ exports.removeArticle = (articleId) => {
   RETURNING *;`,
       [articleId]
     )
-    .then(({rows}) => {
+    .then(({ rows }) => {
       return db.query(
         `DELETE FROM articles 
     WHERE article_id = $1 
@@ -125,8 +125,22 @@ exports.removeArticle = (articleId) => {
       );
     })
     .then(({ rowCount }) => {
-      if(rowCount === 0) {
-        return Promise.reject({status:404, msg:'Article ID not found'})
+      if (rowCount === 0) {
+        return Promise.reject({ status: 404, msg: "Article ID not found" });
       }
+    });
+};
+
+exports.selectArticleByTopic = (topic) => {
+  return db
+    .query(`SELECT * FROM topics WHERE slug = $1`, [topic])
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Topic not found" });
+      }
+      return db.query(`SELECT * FROM articles WHERE topic = $1`, [topic]);
+    })
+    .then(({ rows }) => {
+      return rows;
     });
 };
