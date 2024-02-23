@@ -13,12 +13,15 @@ describe("/api", () => {
       .get("/api")
       .expect(200)
       .then(({ body: { endpoints } }) => {
-        for (let key in endpoints) {
-          expect(endpoints[key]).toHaveProperty("description");
-          expect(endpoints[key]).toHaveProperty("queries");
-          expect(endpoints[key]).toHaveProperty("exampleResponse");
-          if (/(POST)|(PATCH)|(DELETE)/.test(key)) {
-            expect(endpoints[key]).toHaveProperty("bodyFormat");
+        for (let routes in endpoints) {
+          const route = endpoints[routes]
+          for (let endpoint in route) {
+            expect(route[endpoint]).toHaveProperty("description");
+            expect(route[endpoint]).toHaveProperty("queries");
+            expect(route[endpoint]).toHaveProperty("exampleResponse");
+            if (/(POST)|(PATCH)|(DELETE)/.test(endpoint)) {
+              expect(route[endpoint]).toHaveProperty("bodyFormat");
+            }
           }
         }
       });
@@ -70,57 +73,55 @@ describe("/api/topics", () => {
     });
   });
 });
-describe('/api/topics/:topic', () => {
-  describe('GET requests', () => {
-    test('GET 200: responds with an array of all articles related to chosen topic', () => {
+describe("/api/topics/:topic", () => {
+  describe("GET requests", () => {
+    test("GET 200: responds with an array of all articles related to chosen topic", () => {
       return request(app)
-      .get('/api/topics/mitch')
-      .expect(200)
-      .then(({body: {articles}}) => {
-        expect(articles.length).toBe(12);
-        articles.forEach((article) => {
-          expect(article).toMatchObject(({
-            title: expect.any(String),
-            topic: expect.any(String),
-            author: expect.any(String),
-            body: expect.any(String),
-            created_at: expect.any(String),
-            votes: expect.any(Number),
-            article_img_url: expect.any(String)
-          }))
-        })
-      })
+        .get("/api/topics/mitch")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBe(12);
+          articles.forEach((article) => {
+            expect(article).toMatchObject({
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+            });
+          });
+        });
     });
-    test('GET 200: responds with an empty array for a topic with no associated articles', () => {
+    test("GET 200: responds with an empty array for a topic with no associated articles", () => {
       return request(app)
-      .get('/api/topics/paper')
-      .expect(200)
-      .then(({body: {articles}}) => {
-        expect(articles.length).toBe(0);
-      })
+        .get("/api/topics/paper")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBe(0);
+        });
     });
-    test('GET 404: responds with appropriate status and error message for a topic that does not exist', () => {
+    test("GET 404: responds with appropriate status and error message for a topic that does not exist", () => {
       return request(app)
-      .get('/api/topics/forklift')
-      .expect(404)
-      .then(({body: {msg}}) => {
-        expect(msg).toBe('Topic not found');
-      })
+        .get("/api/topics/forklift")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Topic not found");
+        });
     });
   });
-  describe('DELETE requests', () => {
-    test('DELETE 204: responds with appropriate status and no content', () => {
-      return request(app)
-      .delete('/api/topics/mitch')
-      .expect(204)
+  describe("DELETE requests", () => {
+    test("DELETE 204: responds with appropriate status and no content", () => {
+      return request(app).delete("/api/topics/mitch").expect(204);
     });
-    test('DELETE 404: responds with appropriate status and error code for topic that does not exist', () => {
+    test("DELETE 404: responds with appropriate status and error code for topic that does not exist", () => {
       return request(app)
-      .delete('/api/topics/forklift')
-      .expect(404)
-      .then(({body: {msg}}) => {
-        expect(msg).toBe('Topic not found');
-      })
+        .delete("/api/topics/forklift")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Topic not found");
+        });
     });
   });
 });
