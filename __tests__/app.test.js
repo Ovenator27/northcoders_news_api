@@ -108,6 +108,21 @@ describe('/api/topics/:topic', () => {
       })
     });
   });
+  describe('DELETE requests', () => {
+    test('DELETE 204: responds with appropriate status and no content', () => {
+      return request(app)
+      .delete('/api/topics/mitch')
+      .expect(204)
+    });
+    test('DELETE 404: responds with appropriate status and error code for topic that does not exist', () => {
+      return request(app)
+      .delete('/api/topics/forklift')
+      .expect(404)
+      .then(({body: {msg}}) => {
+        expect(msg).toBe('Topic not found');
+      })
+    });
+  });
 });
 describe("/api/articles", () => {
   describe("GET requests", () => {

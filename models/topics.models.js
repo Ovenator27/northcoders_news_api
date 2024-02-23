@@ -20,3 +20,13 @@ exports.insertTopic = (topic) => {
       return rows[0];
     });
 };
+
+exports.removeTopic = (topic) => {
+  return db
+    .query(`DELETE FROM topics WHERE slug = $1 RETURNING *`, [topic])
+    .then(({ rowCount }) => {
+      if (rowCount === 0) {
+        return Promise.reject({ status: 404, msg: "Topic not found" });
+      }
+    });
+};

@@ -4,7 +4,7 @@ const {
   updateArticle,
   insertArticle,
   removeArticle,
-  selectArticleByTopic,
+  selectArticlesByTopic,
 } = require("../models/articles.models");
 
 exports.getArticleById = (req, res, next) => {
@@ -57,9 +57,9 @@ exports.deleteArticle = (req, res, next) => {
     .catch(next);
 };
 
-exports.getArticleByTopic = (req, res, next) => {
+exports.getArticlesByTopic = (req, res, next) => {
   const { topic } = req.params;
-  selectArticleByTopic(topic)
+  selectArticlesByTopic(topic)
     .then((articles) => {
       res.status(200).send({ articles });
     })

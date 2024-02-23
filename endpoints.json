@@ -39,6 +39,12 @@
         }
       ]
   },
+  "DELETE /api/topics/topic": {
+    "description": "deletes topic along with all articles related to the topic",
+    "queries": [],
+    "bodyFormat": {},
+    "exampleResponse": {}
+  },
   "GET /api/articles": {
     "description": "serves an array of all articles",
     "queries": ["topic", "sort_by", "order", "limit", "p"],

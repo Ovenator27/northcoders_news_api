@@ -131,7 +131,7 @@ exports.removeArticle = (articleId) => {
     });
 };
 
-exports.selectArticleByTopic = (topic) => {
+exports.selectArticlesByTopic = (topic) => {
   return db
     .query(`SELECT * FROM topics WHERE slug = $1`, [topic])
     .then(({ rows }) => {
