@@ -55,7 +55,7 @@ exports.selectArticles = (
   }
 
   queryStr += ` GROUP BY articles.article_id
-  ORDER BY articles.${sort_by} ${order}`;
+  ORDER BY ${sort_by} ${order}`;
 
   return db
     .query(queryStr, queryValues)
