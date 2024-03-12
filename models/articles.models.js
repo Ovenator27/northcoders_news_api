@@ -138,7 +138,7 @@ exports.selectArticlesByTopic = (topic) => {
       if (rows.length === 0) {
         return Promise.reject({ status: 404, msg: "Topic not found" });
       }
-      return db.query(`SELECT * FROM articles WHERE topic = $1`, [topic]);
+      return db.query(`SELECT * FROM articles WHERE topic = $1 ORDER BY "created_at`, [topic]);
     })
     .then(({ rows }) => {
       return rows;
