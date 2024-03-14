@@ -6,6 +6,7 @@ exports.customErrors = (err, request, response, next) => {
 
 exports.psqlErrors = (err, request, response, next) => {
   if (err.code === "22P02" || err.code === '23502' || err.code === '23503') {
+    console.log(err);
     response.status(400).send({msg: 'Bad request'})
   } else next(err)
 };

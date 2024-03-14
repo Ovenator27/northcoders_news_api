@@ -351,6 +351,7 @@ describe("/api/articles", () => {
         title: "Title",
         body: "Body",
         topic: "cats",
+        article_img_url: ""
       };
       return request(app)
         .post("/api/articles")

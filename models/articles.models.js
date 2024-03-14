@@ -94,14 +94,14 @@ exports.updateArticle = (articleId, update) => {
 };
 
 exports.insertArticle = (article) => {
-  const { author, title, body, topic } = article;
+  const { author, title, body, topic, article_img_url } = article;
   return db
     .query(
       `INSERT INTO articles 
-  (author, title, body, topic, votes)
+  (author, title, body, topic, article_img_url, votes)
   VALUES
-  ($1, $2, $3, $4, 0) RETURNING *;`,
-      [author, title, body, topic]
+  ($1, $2, $3, $4, $5, 0) RETURNING *;`,
+      [author, title, body, topic, article_img_url]
     )
     .then(({ rows }) => {
       return rows[0];

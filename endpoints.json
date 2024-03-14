@@ -74,7 +74,8 @@
         "author": "username",
         "title": "title",
         "body": "body",
-        "topic": "topic"
+        "topic": "topic",
+        "article_img_url": "article_img_url"
       },
       "exampleResponse": {
         "article_id": 14,
